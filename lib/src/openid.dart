@@ -379,23 +379,30 @@ class Flow {
     };
   }
 
-  Flow.authorizationCode(Client client,
-      {String? state,
-      String? prompt,
-      String? accessType,
-      Uri? redirectUri,
-      List<String> scopes = const ['openid', 'profile', 'email']})
-      : this._(FlowType.authorizationCode, 'code', client,
+  Flow.authorizationCode(
+    Client client, {
+    String? state,
+    String? prompt,
+    String? accessType,
+    Uri? redirectUri,
+    List<String> scopes = const ['openid', 'profile', 'email'],
+    Map<String, String>? additionalParameters,
+  }) : this._(FlowType.authorizationCode, 'code', client,
             state: state,
             additionalParameters: {
               if (prompt != null) 'prompt': prompt,
               if (accessType != null) 'access_type': accessType,
+              ...?additionalParameters,
             },
             scopes: scopes,
             redirectUri: redirectUri);
 
-  Flow.authorizationCodeWithPKCE(Client client, {String? state})
-      : this._(FlowType.proofKeyForCodeExchange, 'code', client, state: state);
+  Flow.authorizationCodeWithPKCE(
+    Client client, {
+    String? state,
+    Map<String, String>? additionalParameters,
+  }) : this._(FlowType.proofKeyForCodeExchange, 'code', client,
+            state: state, additionalParameters: additionalParameters);
 
   Flow.implicit(Client client, {String? state})
       : this._(

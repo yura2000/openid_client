@@ -23,10 +23,13 @@ class Authenticator {
       {this.port = 3000,
       this.urlLancher = _runBrowser,
       Iterable<String> scopes = const [],
+      Map<String, String>? additionalParameters,
       Uri? redirectUri})
       : flow = redirectUri == null
-            ? Flow.authorizationCodeWithPKCE(client)
-            : Flow.authorizationCode(client)
+            ? Flow.authorizationCodeWithPKCE(client,
+                additionalParameters: additionalParameters)
+            : Flow.authorizationCode(client,
+                additionalParameters: additionalParameters)
           ..scopes.addAll(scopes)
           ..redirectUri = redirectUri ?? Uri.parse('http://localhost:$port/');
 
@@ -40,6 +43,18 @@ class Authenticator {
     var response = await _requestsByState[state]!.future;
 
     return flow.callback(response);
+  }
+
+  Future<void> custom(String url) async {
+    var state = flow.authenticationUri.queryParameters['state']!;
+
+    _requestsByState[state] = Completer();
+    await _startServer(port);
+    urlLancher(url);
+
+    await _requestsByState[state]!.future;
+
+    return;
   }
 
   /// cancel the ongoing auth flow, i.e. when the user closed the webview/browser without a successful login
